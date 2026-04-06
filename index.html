@@ -1,0 +1,1700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>60-Day Sprint Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Syne:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ─────────────────────────────────────────
+   RESET & ROOT
+───────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#07070e;
+  --surface:#0d0d1a;
+  --card:#131320;
+  --border:#1c1c30;
+  --border-hi:#2a2a42;
+  --accent:#f5a623;
+  --accent-dim:rgba(245,166,35,.12);
+  --accent-glow:rgba(245,166,35,.22);
+  --green:#0fd68a;
+  --red:#f43f5e;
+  --text:#eeeef7;
+  --text-2:#6b6b9a;
+  --text-3:#32324e;
+  --font-d:'Cormorant Garamond',serif;
+  --font-u:'Syne',sans-serif;
+  --font-m:'JetBrains Mono',monospace;
+  --r:10px;
+  --rs:5px;
+}
+html{height:100%}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font-u);
+  min-height:100%;
+  line-height:1.55;
+  overflow-x:hidden;
+}
+/* Top accent line */
+body::before{
+  content:'';
+  position:fixed;
+  top:0;left:0;right:0;
+  height:2px;
+  background:linear-gradient(90deg,transparent,var(--accent),transparent);
+  z-index:999;
+  pointer-events:none;
+}
+/* Noise texture */
+body::after{
+  content:'';
+  position:fixed;
+  inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  pointer-events:none;
+  z-index:0;
+  opacity:.5;
+}
+
+/* ─────────────────────────────────────────
+   SCROLLBAR
+───────────────────────────────────────── */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border-hi);border-radius:2px}
+
+/* ─────────────────────────────────────────
+   SETUP SCREEN
+───────────────────────────────────────── */
+#setup{
+  position:fixed;inset:0;
+  background:var(--bg);
+  display:flex;align-items:center;justify-content:center;
+  z-index:100;padding:24px;
+}
+.setup-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  padding:48px 44px;
+  max-width:560px;width:100%;
+  position:relative;
+  animation:fadeUp .4s ease;
+}
+.setup-card::before{
+  content:'';
+  position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--accent),transparent);
+  border-radius:var(--r) var(--r) 0 0;
+}
+.setup-eyebrow{
+  font-size:.7rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:.12em;
+  color:var(--accent);margin-bottom:10px;
+}
+.setup-title{
+  font-family:var(--font-d);
+  font-size:2.8rem;font-weight:700;line-height:1.05;
+  margin-bottom:6px;
+  background:linear-gradient(135deg,var(--text) 40%,var(--accent));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.setup-sub{color:var(--text-2);font-size:.88rem;margin-bottom:38px}
+.form-row{margin-bottom:20px}
+.form-label{
+  display:block;font-size:.71rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:.09em;
+  color:var(--text-2);margin-bottom:8px;
+}
+.fi{
+  width:100%;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--rs);
+  color:var(--text);
+  font-family:var(--font-u);font-size:.92rem;
+  padding:11px 14px;outline:none;
+  transition:border-color .2s;
+}
+.fi:focus{border-color:var(--accent)}
+.habits-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media(max-width:500px){.habits-grid{grid-template-columns:1fr}}
+.setup-activity-list{display:flex;flex-direction:column;gap:10px}
+.setup-activity-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center}
+.setup-mini-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.btn-inline{padding:10px 14px;background:transparent;color:var(--text);border:1px solid var(--border);border-radius:var(--rs);font-family:var(--font-u);font-weight:600;font-size:.78rem;cursor:pointer;transition:border-color .2s,color .2s,transform .15s}
+.btn-inline:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-1px)}
+.btn-inline:active{transform:translateY(0)}
+.btn-inline:disabled{opacity:.45;cursor:not-allowed;transform:none;color:var(--text-3);border-color:var(--border)}
+.btn-icon{padding:10px 12px;min-width:44px;text-align:center}
+.btn-p{
+  width:100%;margin-top:10px;
+  padding:14px;
+  background:var(--accent);color:#000;
+  font-family:var(--font-u);font-weight:700;font-size:.92rem;
+  letter-spacing:.05em;text-transform:uppercase;
+  border:none;border-radius:var(--rs);
+  cursor:pointer;transition:opacity .2s,transform .15s;
+}
+.btn-p:hover{opacity:.88;transform:translateY(-1px)}
+.btn-p:active{transform:translateY(0)}
+
+/* ─────────────────────────────────────────
+   APP SHELL
+───────────────────────────────────────── */
+#app{
+  max-width:1120px;margin:0 auto;
+  padding:0 24px 80px;
+  position:relative;z-index:1;
+}
+
+/* ─────────────────────────────────────────
+   HEADER
+───────────────────────────────────────── */
+.app-header{
+  display:flex;align-items:center;
+  justify-content:space-between;
+  padding:32px 0 26px;
+  border-bottom:1px solid var(--border);
+  gap:20px;flex-wrap:wrap;
+}
+.header-left{flex:1;min-width:160px}
+#sprint-name-display{
+  font-family:var(--font-d);
+  font-size:2.1rem;font-weight:700;line-height:1;
+  cursor:pointer;display:inline-block;
+  border-bottom:1px dashed var(--border-hi);
+  transition:border-color .2s;padding-bottom:2px;
+}
+#sprint-name-display:hover{border-color:var(--accent)}
+.sprint-meta{
+  font-size:.77rem;color:var(--text-2);
+  margin-top:7px;font-family:var(--font-m);
+}
+.header-right{display:flex;align-items:center;gap:28px;flex-wrap:wrap}
+.hdr-stat{text-align:center}
+.hdr-val{
+  font-family:var(--font-m);font-size:1.7rem;
+  font-weight:500;color:var(--accent);line-height:1;
+}
+.hdr-lbl{
+  font-size:.66rem;color:var(--text-2);
+  text-transform:uppercase;letter-spacing:.07em;margin-top:3px;
+}
+.hdr-prog{width:150px}
+.prog-track{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:4px}
+.prog-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .5s ease}
+.prog-label{font-size:.7rem;color:var(--text-2);text-align:right;font-family:var(--font-m)}
+
+/* ─────────────────────────────────────────
+   TABS
+───────────────────────────────────────── */
+.tabs{
+  display:flex;gap:0;
+  border-bottom:1px solid var(--border);
+  margin-bottom:36px;
+  overflow-x:auto;-webkit-overflow-scrolling:touch;
+}
+.tab-btn{
+  padding:17px 22px;
+  background:none;border:none;
+  border-bottom:2px solid transparent;
+  color:var(--text-2);
+  font-family:var(--font-u);font-size:.8rem;
+  font-weight:700;text-transform:uppercase;letter-spacing:.07em;
+  cursor:pointer;transition:color .2s,border-color .2s;
+  margin-bottom:-1px;white-space:nowrap;
+}
+.tab-btn:hover{color:var(--text)}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+
+/* ─────────────────────────────────────────
+   SHARED COMPONENTS
+───────────────────────────────────────── */
+.sec-label{
+  font-size:.72rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:.09em;
+  color:var(--text-2);
+}
+.card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+}
+.card-top{
+  position:relative;overflow:hidden;
+}
+.card-top::before{
+  content:'';
+  position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--accent) 50%,transparent);
+}
+.habit-bar-wrap{height:5px;background:var(--border);border-radius:3px;overflow:hidden;margin-bottom:10px}
+.habit-bar{height:100%;border-radius:3px;transition:width .22s ease,background .3s}
+input[type=range]{
+  -webkit-appearance:none;appearance:none;
+  width:100%;height:20px;background:transparent;
+  cursor:pointer;outline:none;padding:6px 0;
+}
+input[type=range]::-webkit-slider-runnable-track{
+  height:4px;background:var(--border-hi);border-radius:2px;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;
+  width:18px;height:18px;border-radius:50%;
+  background:var(--accent);border:2px solid var(--bg);
+  box-shadow:0 0 8px var(--accent-glow);cursor:pointer;
+}
+input[type=range]::-moz-range-track{height:4px;background:var(--border-hi);border-radius:2px}
+input[type=range]::-moz-range-thumb{
+  width:18px;height:18px;border-radius:50%;
+  background:var(--accent);border:2px solid var(--bg);cursor:pointer;
+}
+.btn-s{
+  padding:10px 18px;
+  background:transparent;color:var(--text);
+  border:1px solid var(--border);border-radius:var(--rs);
+  font-family:var(--font-u);font-weight:600;font-size:.8rem;
+  cursor:pointer;transition:border-color .2s,color .2s;
+}
+.btn-s:hover{border-color:var(--accent);color:var(--accent)}
+.btn-g{
+  padding:10px 16px;
+  background:transparent;color:var(--text-2);
+  border:1px solid var(--border);border-radius:var(--rs);
+  font-family:var(--font-u);font-size:.8rem;
+  cursor:pointer;transition:all .2s;
+}
+.btn-g:hover{color:var(--text);border-color:var(--border-hi)}
+.btn-danger{
+  padding:10px 18px;background:transparent;
+  color:var(--red);border:1px solid var(--red);
+  border-radius:var(--rs);font-family:var(--font-u);
+  font-weight:600;font-size:.8rem;cursor:pointer;transition:background .2s;
+}
+.btn-danger:hover{background:rgba(244,63,94,.1)}
+
+/* ─────────────────────────────────────────
+   TODAY VIEW
+───────────────────────────────────────── */
+.today-layout{
+  display:grid;grid-template-columns:300px 1fr;gap:24px;align-items:start;
+}
+@media(max-width:720px){.today-layout{grid-template-columns:1fr}}
+.today-hero{padding:36px 28px;text-align:center}
+.day-badge{
+  font-family:var(--font-m);font-size:1.9rem;
+  font-weight:500;line-height:1;margin-bottom:5px;
+}
+.day-badge .of{color:var(--text-2);font-size:1.1rem}
+.day-date{
+  font-size:.78rem;color:var(--text-2);
+  margin-bottom:28px;text-transform:uppercase;letter-spacing:.07em;
+}
+.ring-wrap{
+  position:relative;display:inline-block;
+  margin-bottom:28px;
+}
+.ring-center{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+}
+.ring-pct{
+  font-family:var(--font-m);font-size:2rem;
+  font-weight:500;line-height:1;
+}
+.ring-lbl{
+  font-size:.66rem;color:var(--text-2);
+  text-transform:uppercase;letter-spacing:.07em;margin-top:3px;
+}
+.progress-ring{display:block;filter:drop-shadow(0 0 14px var(--accent-glow))}
+.today-actions{display:flex;flex-direction:column;gap:10px}
+.btn-complete{
+  padding:13px 20px;
+  background:var(--green);color:#000;border:none;
+  border-radius:var(--rs);font-family:var(--font-u);
+  font-weight:700;font-size:.85rem;
+  letter-spacing:.04em;text-transform:uppercase;
+  cursor:pointer;transition:opacity .2s,transform .15s;
+  box-shadow:0 4px 20px rgba(15,214,138,.2);
+}
+.btn-complete:hover{opacity:.85;transform:translateY(-1px)}
+.btn-complete:active{transform:translateY(0)}
+.today-habits{display:flex;flex-direction:column}
+.habit-row{padding:20px 0;border-bottom:1px solid var(--border)}
+.habit-row:last-of-type{border-bottom:none}
+.habit-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.habit-name{font-weight:600;font-size:.93rem}
+.habit-val{font-family:var(--font-m);font-size:.88rem;font-weight:500;color:var(--accent)}
+.today-save-row{display:flex;gap:10px;margin-top:24px;flex-wrap:wrap}
+.no-current{
+  text-align:center;padding:80px 20px;color:var(--text-2);
+}
+.no-current h2{
+  font-family:var(--font-d);font-size:2rem;
+  color:var(--text);margin-bottom:12px;
+}
+.no-current p{margin-bottom:24px;font-size:.9rem}
+
+/* ─────────────────────────────────────────
+   GRID VIEW
+───────────────────────────────────────── */
+.grid-header{
+  display:flex;justify-content:space-between;
+  align-items:center;margin-bottom:24px;
+  gap:12px;flex-wrap:wrap;
+}
+.grid-legend{
+  display:flex;gap:16px;font-size:.73rem;color:var(--text-2);flex-wrap:wrap;
+}
+.leg-item{display:flex;align-items:center;gap:5px}
+.leg-dot{width:8px;height:8px;border-radius:50%}
+.day-grid{
+  display:grid;grid-template-columns:repeat(10,1fr);gap:8px;
+}
+@media(max-width:700px){.day-grid{grid-template-columns:repeat(6,1fr);gap:6px}}
+@media(max-width:400px){.day-grid{grid-template-columns:repeat(5,1fr);gap:5px}}
+.day-cell{
+  aspect-ratio:1;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--rs);
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  cursor:pointer;
+  transition:border-color .2s,transform .15s,box-shadow .2s;
+  position:relative;overflow:hidden;padding:4px;gap:2px;
+}
+.day-cell:hover{
+  border-color:var(--accent);
+  transform:scale(1.08);
+  box-shadow:0 6px 24px rgba(0,0,0,.5);z-index:2;
+}
+.day-cell.st-current{
+  border-color:var(--accent);
+  box-shadow:0 0 14px var(--accent-glow);
+}
+.day-cell.st-future{opacity:.35}
+.day-cell.st-future:hover{opacity:.65}
+.cell-num{
+  font-family:var(--font-m);font-size:.6rem;
+  color:var(--text-2);line-height:1;
+}
+.cell-ring{display:block}
+.grid-hint{
+  margin-top:20px;font-size:.75rem;
+  color:var(--text-3);text-align:center;
+  font-family:var(--font-m);
+}
+
+/* ─────────────────────────────────────────
+   LOG VIEW
+───────────────────────────────────────── */
+.log-wrap{
+  overflow-x:auto;
+  border:1px solid var(--border);border-radius:var(--r);
+}
+.log-table{width:100%;border-collapse:collapse;font-size:.855rem}
+.log-table th{
+  padding:13px 16px;background:var(--surface);
+  text-align:left;font-size:.69rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:.08em;
+  color:var(--text-2);border-bottom:1px solid var(--border);
+  white-space:nowrap;
+}
+.log-table td{padding:10px 16px;border-bottom:1px solid var(--border);vertical-align:middle}
+.log-table tr:last-child td{border-bottom:none}
+.log-table tbody tr{cursor:pointer;transition:background .15s}
+.log-table tbody tr:hover{background:var(--surface)}
+.row-current{background:var(--accent-dim)!important}
+.row-future td{color:var(--text-3)}
+.s-dot{
+  display:inline-block;width:6px;height:6px;
+  border-radius:50%;margin-right:6px;
+  vertical-align:middle;
+}
+.mini-bar-wrap{
+  height:4px;background:var(--border);border-radius:2px;
+  overflow:hidden;width:72px;display:inline-block;
+}
+.mini-bar{height:100%;border-radius:2px}
+.log-avg-row td{
+  background:var(--surface);font-weight:700;
+  color:var(--accent);border-top:2px solid var(--border-hi);
+  font-family:var(--font-m);font-size:.8rem;
+  padding:12px 16px;
+}
+
+/* ─────────────────────────────────────────
+   STATS VIEW
+───────────────────────────────────────── */
+.stats-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+  gap:14px;margin-bottom:32px;
+}
+.stat-card{padding:26px 22px}
+.stat-card-lbl{
+  font-size:.68rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:.09em;
+  color:var(--text-2);margin-bottom:10px;
+}
+.stat-card-val{
+  font-family:var(--font-m);font-size:2.3rem;
+  font-weight:500;color:var(--accent);line-height:1;
+}
+.stat-card-sub{font-size:.75rem;color:var(--text-2);margin-top:7px}
+.stats-section{margin-bottom:30px}
+.stats-section-title{
+  font-family:var(--font-d);font-size:1.35rem;
+  color:var(--text);margin-bottom:18px;
+}
+.hab-avg-row{margin-bottom:16px}
+.hab-avg-hdr{
+  display:flex;justify-content:space-between;
+  margin-bottom:7px;font-size:.875rem;
+}
+.hab-avg-val{font-family:var(--font-m);color:var(--accent)}
+.spark-wrap{padding:28px}
+.spark-title{
+  font-size:.69rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:.09em;
+  color:var(--text-2);margin-bottom:20px;
+}
+.empty-stats{
+  text-align:center;padding:48px;color:var(--text-2);font-size:.875rem;
+}
+
+/* ─────────────────────────────────────────
+   SETTINGS VIEW
+───────────────────────────────────────── */
+.set-section{padding:28px;margin-bottom:18px}
+.set-section-title{
+  font-family:var(--font-d);font-size:1.2rem;
+  margin-bottom:20px;display:flex;align-items:center;gap:12px;
+}
+.set-section-title::after{
+  content:'';flex:1;height:1px;background:var(--border);
+}
+.set-row{margin-bottom:20px}
+.def-slider-row{
+  display:grid;grid-template-columns:1fr auto;
+  gap:10px;align-items:center;margin-bottom:14px;
+}
+.def-val{
+  font-family:var(--font-m);font-size:.9rem;
+  color:var(--accent);min-width:38px;text-align:right;
+}
+.set-actions{display:flex;gap:10px;flex-wrap:wrap}
+
+/* ─────────────────────────────────────────
+   MODAL
+───────────────────────────────────────── */
+.modal-backdrop{
+  position:fixed;inset:0;
+  background:rgba(0,0,0,.72);
+  backdrop-filter:blur(6px);
+  z-index:300;
+  display:flex;align-items:center;justify-content:center;
+  padding:20px;
+}
+.modal-card{
+  background:var(--surface);
+  border:1px solid var(--border-hi);
+  border-radius:var(--r);
+  padding:32px;max-width:480px;width:100%;
+  position:relative;max-height:92vh;overflow-y:auto;
+  animation:modalIn .25s ease;
+}
+@keyframes modalIn{
+  from{opacity:0;transform:translateY(20px) scale(.97)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+.modal-hdr{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px}
+.modal-title{font-family:var(--font-d);font-size:1.65rem;line-height:1}
+.modal-sub{font-size:.77rem;color:var(--text-2);margin-top:4px;font-family:var(--font-m);text-transform:uppercase;letter-spacing:.06em}
+.modal-close{
+  background:none;border:none;color:var(--text-2);
+  font-size:1.2rem;cursor:pointer;padding:4px;
+  line-height:1;transition:color .2s;border-radius:4px;
+}
+.modal-close:hover{color:var(--text)}
+.modal-ring-wrap{
+  position:relative;display:inline-block;
+  margin-bottom:24px;display:flex;justify-content:center;margin-bottom:28px;
+}
+.modal-ring-inner{position:relative;display:inline-block}
+.modal-ring-center{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+}
+.modal-footer{display:flex;gap:10px;margin-top:24px}
+.modal-footer .btn-p{flex:1;margin-top:0}
+.modal-notes{
+  width:100%;background:var(--card);
+  border:1px solid var(--border);border-radius:var(--rs);
+  color:var(--text);font-family:var(--font-u);
+  font-size:.875rem;padding:10px 14px;
+  resize:vertical;min-height:60px;outline:none;
+  transition:border-color .2s;
+}
+.modal-notes:focus{border-color:var(--accent)}
+
+/* ─────────────────────────────────────────
+   SPRINT NAME EDIT
+───────────────────────────────────────── */
+.sprint-name-input{
+  font-family:var(--font-d);font-size:2.1rem;font-weight:700;
+  background:transparent;border:none;
+  border-bottom:1px solid var(--accent);
+  color:var(--text);outline:none;width:280px;
+}
+
+/* ─────────────────────────────────────────
+   TOAST
+───────────────────────────────────────── */
+.toast{
+  position:fixed;bottom:28px;left:50%;
+  transform:translateX(-50%) translateY(0);
+  background:var(--card);border:1px solid var(--border-hi);
+  border-radius:var(--rs);padding:10px 22px;
+  font-size:.85rem;color:var(--text);
+  z-index:999;white-space:nowrap;
+  animation:toastIn .3s ease,toastOut .3s ease 2.3s forwards;
+}
+@keyframes toastIn{
+  from{opacity:0;transform:translateX(-50%) translateY(10px)}
+  to{opacity:1;transform:translateX(-50%) translateY(0)}
+}
+@keyframes toastOut{
+  from{opacity:1}to{opacity:0}
+}
+
+/* ─────────────────────────────────────────
+   ANIMATIONS
+───────────────────────────────────────── */
+.view-panel{animation:fadeUp .25s ease}
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(8px)}
+  to{opacity:1;transform:translateY(0)}
+}
+</style>
+</head>
+<body>
+
+<!-- ─── SETUP SCREEN ─── -->
+<div id="setup">
+  <div class="setup-card">
+    <div class="setup-eyebrow">Activity Tracker</div>
+    <h1 class="setup-title">Begin Your<br>60-Day Sprint</h1>
+    <p class="setup-sub">Add as many activities as you want. Sixty days. Everything lives right here — no account, no cloud.</p>
+
+    <div class="form-row">
+      <label class="form-label">Sprint Name</label>
+      <input class="fi" id="s-name" type="text" value="60-Day Sprint" placeholder="My Sprint">
+    </div>
+    <div class="form-row">
+      <label class="form-label">Start Date</label>
+      <input class="fi" id="s-date" type="date" style="max-width:200px">
+    </div>
+    <div class="form-row">
+      <label class="form-label">Your Activities</label>
+      <div class="setup-activity-list" id="setup-activities"></div>
+      <div class="setup-mini-actions">
+        <button class="btn-inline" type="button" onclick="addSetupActivity()">+ Add Activity</button>
+      </div>
+    </div>
+    <button class="btn-p" onclick="beginSprint()">Begin Sprint →</button>
+  </div>
+</div>
+
+<!-- ─── MAIN APP ─── -->
+<div id="app" style="display:none">
+
+  <header class="app-header">
+    <div class="header-left">
+      <div id="sprint-name-display" onclick="editSprintName()"></div>
+      <div class="sprint-meta" id="sprint-meta"></div>
+    </div>
+    <div class="header-right">
+      <div class="hdr-stat">
+        <div class="hdr-val" id="hdr-day">—</div>
+        <div class="hdr-lbl">Current Day</div>
+      </div>
+      <div class="hdr-stat">
+        <div class="hdr-val" id="hdr-streak">0</div>
+        <div class="hdr-lbl">Day Streak</div>
+      </div>
+      <div class="hdr-stat">
+        <div class="hdr-val" id="hdr-avg">—</div>
+        <div class="hdr-lbl">Sprint Avg</div>
+      </div>
+      <div class="hdr-prog">
+        <div class="prog-track"><div class="prog-fill" id="hdr-prog-bar"></div></div>
+        <div class="prog-label" id="hdr-prog-lbl"></div>
+      </div>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="today" onclick="switchTab('today')">Today</button>
+    <button class="tab-btn" data-tab="grid" onclick="switchTab('grid')">60-Day Grid</button>
+    <button class="tab-btn" data-tab="log" onclick="switchTab('log')">Log</button>
+    <button class="tab-btn" data-tab="stats" onclick="switchTab('stats')">Stats</button>
+    <button class="tab-btn" data-tab="settings" onclick="switchTab('settings')">Settings</button>
+  </nav>
+
+  <main>
+    <div id="view-today" class="view-panel"></div>
+    <div id="view-grid"  class="view-panel" style="display:none"></div>
+    <div id="view-log"   class="view-panel" style="display:none"></div>
+    <div id="view-stats" class="view-panel" style="display:none"></div>
+    <div id="view-settings" class="view-panel" style="display:none"></div>
+  </main>
+
+</div>
+
+<!-- ─── MODAL ─── -->
+<div id="modal" style="display:none">
+  <div class="modal-backdrop" onclick="closeModalBackdrop(event)">
+    <div class="modal-card" id="modal-card"></div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════ */
+let S = {};
+let activeTab = 'today';
+let modalEdits = {};
+
+const STORE_KEY = 'sprint60_v3';
+const DEFAULT_SETUP_ACTIVITIES = ['Morning Workout', 'Deep Work', 'Healthy Eating'];
+let setupActivities = [...DEFAULT_SETUP_ACTIVITIES];
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      S = normalizeState(parsed);
+      return true;
+    }
+  } catch(e) {}
+  return false;
+}
+
+function saveState() {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(normalizeState(S))); } catch(e) {}
+}
+
+function initState(name, date, habits) {
+  const cleanHabits = habits.map(h => h.trim()).filter(Boolean);
+  S = normalizeState({
+    sprintName: name,
+    startDate: date,
+    habitNames: cleanHabits,
+    defaults: Array.from({length: cleanHabits.length}, () => 0),
+    days: Array.from({length: 60}, (_, i) => ({
+      day: i + 1,
+      status: i === 0 ? 'current' : 'future',
+      h: Array.from({length: cleanHabits.length}, () => null),
+      notes: ''
+    }))
+  });
+  saveState();
+}
+
+/* ═══════════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════════ */
+function habitCount() {
+  return Array.isArray(S.habitNames) ? S.habitNames.length : 0;
+}
+
+function emptyHabitValues() {
+  return Array.from({length: habitCount()}, () => null);
+}
+
+function normalizeDay(day, count, index) {
+  const values = Array.isArray(day?.h) ? day.h.slice(0, count) : [];
+  while (values.length < count) values.push(null);
+
+  let status = day?.status;
+  if (!['past', 'current', 'future'].includes(status)) {
+    status = index === 0 ? 'current' : 'future';
+  }
+
+  return {
+    day: typeof day?.day === 'number' ? day.day : index + 1,
+    status,
+    h: values,
+    notes: typeof day?.notes === 'string' ? day.notes : ''
+  };
+}
+
+function normalizeState(state) {
+  const names = Array.isArray(state?.habitNames)
+    ? state.habitNames.map(v => String(v || '').trim()).filter(Boolean)
+    : [];
+  const habitNames = names.length ? names : [...DEFAULT_SETUP_ACTIVITIES];
+  const count = habitNames.length;
+
+  const defaults = Array.isArray(state?.defaults) ? state.defaults.slice(0, count) : [];
+  while (defaults.length < count) defaults.push(0);
+
+  const daysSrc = Array.isArray(state?.days) ? state.days : [];
+  const days = Array.from({length: 60}, (_, i) => normalizeDay(daysSrc[i] || {}, count, i));
+
+  const currentExists = days.some(d => d.status === 'current');
+  if (!currentExists) {
+    const firstFuture = days.find(d => d.status === 'future');
+    if (firstFuture) firstFuture.status = 'current';
+  }
+  if (days.filter(d => d.status === 'current').length > 1) {
+    let seen = false;
+    days.forEach(d => {
+      if (d.status === 'current') {
+        if (!seen) seen = true;
+        else d.status = 'future';
+      }
+    });
+  }
+
+  return {
+    sprintName: String(state?.sprintName || '60-Day Sprint'),
+    startDate: state?.startDate || new Date().toISOString().split('T')[0],
+    habitNames,
+    defaults: defaults.map(v => Number.isFinite(Number(v)) ? Math.max(0, Math.min(100, Number(v))) : 0),
+    days
+  };
+}
+
+function getH(d, i) {
+  const v = d.h[i];
+  const def = S.defaults[i] ?? 0;
+  return (v !== null && v !== undefined) ? v : def;
+}
+
+function getTotal(d) {
+  const count = habitCount();
+  if (!count) return 0;
+  return S.habitNames.reduce((sum, _, i) => sum + getH(d, i), 0) / count;
+}
+
+function currentDay() {
+  return S.days.find(d => d.status === 'current') || null;
+}
+
+function fmtDate(dayNum) {
+  const base = new Date(S.startDate + 'T12:00:00');
+  base.setDate(base.getDate() + dayNum - 1);
+  return base.toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric'});
+}
+
+function colorFor(pct) {
+  if (pct >= 67) return '#0fd68a';
+  if (pct >= 34) return '#f5a623';
+  return '#f43f5e';
+}
+
+function calcStreak() {
+  const past = S.days.filter(d => d.status === 'past').sort((a,b) => b.day - a.day);
+  let s = 0;
+  for (const d of past) { if (getTotal(d) >= 50) s++; else break; }
+  return s;
+}
+
+function countPast() {
+  return S.days.filter(d => d.status === 'past').length;
+}
+
+function sprintAvg() {
+  const past = S.days.filter(d => d.status === 'past');
+  if (!past.length) return null;
+  return past.reduce((s,d) => s + getTotal(d), 0) / past.length;
+}
+
+function setupActivityPlaceholder(i) {
+  return `Activity ${i + 1}`;
+}
+
+function renderSetupActivities() {
+  const wrap = document.getElementById('setup-activities');
+  if (!wrap) return;
+  wrap.innerHTML = setupActivities.map((name, i) => `
+    <div class="setup-activity-row">
+      <input class="fi setup-activity-input" type="text" value="${escHtml(name)}" placeholder="${setupActivityPlaceholder(i)}"
+        oninput="updateSetupActivity(${i}, this.value)">
+      <button class="btn-inline btn-icon" type="button" onclick="removeSetupActivity(${i})" ${setupActivities.length <= 1 ? 'disabled' : ''}>✕</button>
+    </div>
+  `).join('');
+}
+
+function initSetupActivities(values) {
+  const next = Array.isArray(values) ? values : DEFAULT_SETUP_ACTIVITIES;
+  setupActivities = next.map(v => String(v || '').trim());
+  if (!setupActivities.length) setupActivities = [''];
+  renderSetupActivities();
+}
+
+function addSetupActivity(value = '') {
+  setupActivities.push(value);
+  renderSetupActivities();
+}
+
+function removeSetupActivity(index) {
+  if (setupActivities.length <= 1) return;
+  setupActivities.splice(index, 1);
+  renderSetupActivities();
+}
+
+function updateSetupActivity(index, value) {
+  setupActivities[index] = value;
+}
+
+/* ═══════════════════════════════════════════
+   SETUP
+═══════════════════════════════════════════ */
+function getH(d, i) {
+  const v = d.h[i];
+  return (v !== null && v !== undefined) ? v : S.defaults[i];
+}
+
+function getTotal(d) {
+  return (getH(d,0) + getH(d,1) + getH(d,2)) / 3;
+}
+
+function currentDay() {
+  return S.days.find(d => d.status === 'current') || null;
+}
+
+function fmtDate(dayNum) {
+  const base = new Date(S.startDate + 'T12:00:00');
+  base.setDate(base.getDate() + dayNum - 1);
+  return base.toLocaleDateString('en-US', {weekday:'short', month:'short', day:'numeric'});
+}
+
+function colorFor(pct) {
+  if (pct >= 67) return '#0fd68a';
+  if (pct >= 34) return '#f5a623';
+  return '#f43f5e';
+}
+
+function calcStreak() {
+  const past = S.days.filter(d => d.status === 'past').sort((a,b) => b.day - a.day);
+  let s = 0;
+  for (const d of past) { if (getTotal(d) >= 50) s++; else break; }
+  return s;
+}
+
+function countPast() {
+  return S.days.filter(d => d.status === 'past').length;
+}
+
+function sprintAvg() {
+  const past = S.days.filter(d => d.status === 'past');
+  if (!past.length) return null;
+  return past.reduce((s,d) => s + getTotal(d), 0) / past.length;
+}
+
+/* ═══════════════════════════════════════════
+   SVG RINGS
+   size: outer px dimension
+   stroke: ring thickness
+═══════════════════════════════════════════ */
+function svgRing(pct, size, stroke) {
+  stroke = stroke || 8;
+  const r = (size - stroke * 2) / 2;
+  const cx = size / 2, cy = size / 2;
+  const circ = 2 * Math.PI * r;
+  const dash = Math.max(0, Math.min(pct / 100, 1) * circ);
+  const col = colorFor(pct);
+  return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" class="progress-ring">
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#1c1c30" stroke-width="${stroke}"/>
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${col}" stroke-width="${stroke}"
+      stroke-dasharray="${dash.toFixed(2)} ${circ.toFixed(2)}" stroke-linecap="round"
+      transform="rotate(-90 ${cx} ${cy})" style="transition:stroke-dasharray .35s ease,stroke .3s ease"/>
+  </svg>`;
+}
+
+/* ═══════════════════════════════════════════
+   SETUP
+═══════════════════════════════════════════ */
+function beginSprint() {
+  const name   = document.getElementById('s-name').value.trim() || '60-Day Sprint';
+  const date   = document.getElementById('s-date').value || new Date().toISOString().split('T')[0];
+  const habits = Array.from(document.querySelectorAll('.setup-activity-input'))
+    .map(el => el.value.trim())
+    .filter(Boolean);
+
+  if (!habits.length) {
+    toast('Add at least one activity to begin');
+    return;
+  }
+
+  initState(name, date, habits);
+  showApp();
+}
+
+/* ═══════════════════════════════════════════
+   APP DISPLAY
+═══════════════════════════════════════════ */
+function showApp() {
+  document.getElementById('setup').style.display = 'none';
+  document.getElementById('app').style.display   = 'block';
+  renderAll();
+}
+
+function renderAll() {
+  renderHeader();
+  ['today','grid','log','stats','settings'].forEach(v => {
+    const el = document.getElementById('view-' + v);
+    if (el && el.style.display !== 'none') renderView(v);
+  });
+}
+
+function renderView(tab) {
+  if      (tab === 'today')    renderToday();
+  else if (tab === 'grid')     renderGrid();
+  else if (tab === 'log')      renderLog();
+  else if (tab === 'stats')    renderStats();
+  else if (tab === 'settings') renderSettings();
+}
+
+/* ═══════════════════════════════════════════
+   HEADER
+═══════════════════════════════════════════ */
+function renderHeader() {
+  document.getElementById('sprint-name-display').textContent = S.sprintName;
+
+  const past = countPast();
+  const cd   = currentDay();
+  const startFmt = new Date(S.startDate + 'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  document.getElementById('sprint-meta').textContent = `Started ${startFmt}  ·  ${past} day${past!==1?'s':''} logged`;
+
+  document.getElementById('hdr-day').textContent    = cd ? cd.day : '✓';
+  document.getElementById('hdr-streak').textContent = calcStreak();
+
+  const avg = sprintAvg();
+  document.getElementById('hdr-avg').textContent = avg !== null ? Math.round(avg) + '%' : '—';
+
+  const pct = (past / 60) * 100;
+  document.getElementById('hdr-prog-bar').style.width = pct + '%';
+  document.getElementById('hdr-prog-lbl').textContent  = `${past} / 60 days`;
+}
+
+/* ═══════════════════════════════════════════
+   TAB SWITCHING
+═══════════════════════════════════════════ */
+function switchTab(tab) {
+  activeTab = tab;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+  document.querySelectorAll('.view-panel').forEach(v => v.style.display = 'none');
+  const el = document.getElementById('view-' + tab);
+  el.style.display = 'block';
+  // Re-trigger animation
+  el.classList.remove('view-panel');
+  void el.offsetWidth;
+  el.classList.add('view-panel');
+  renderView(tab);
+}
+
+/* ═══════════════════════════════════════════
+   TODAY VIEW
+═══════════════════════════════════════════ */
+function renderToday() {
+  const cd  = currentDay();
+  const box = document.getElementById('view-today');
+
+  if (!cd) {
+    const allDone = S.days.every(d => d.status === 'past');
+    box.innerHTML = `
+      <div class="no-current">
+        ${allDone
+          ? `<h2>Sprint Complete! 🎉</h2>
+             <p>All 60 days logged. Head to <strong>Stats</strong> for your full report.</p>`
+          : `<h2>No Active Day</h2>
+             <p>Ready to begin your next day?</p>
+             <button class="btn-p" style="width:auto;padding:13px 36px;display:inline-block;margin-top:0" onclick="startNewDay()">
+               Start Next Day →
+             </button>`
+        }
+      </div>`;
+    return;
+  }
+
+  const vals  = S.habitNames.map((_, i) => getH(cd, i));
+  const total = getTotal(cd);
+
+  box.innerHTML = `
+    <div class="today-layout">
+
+      <!-- LEFT: Hero ring + actions -->
+      <div class="card card-top today-hero">
+        <div class="day-badge">Day ${cd.day}<span class="of"> / 60</span></div>
+        <div class="day-date">${fmtDate(cd.day)}</div>
+
+        <div class="ring-wrap">
+          ${svgRing(total, 160)}
+          <div class="ring-center">
+            <div class="ring-pct" id="t-ring-pct" style="color:${colorFor(total)}">${Math.round(total)}%</div>
+            <div class="ring-lbl">daily avg</div>
+          </div>
+        </div>
+
+        <div class="today-actions">
+          <button class="btn-complete" onclick="completeDay()">✓ Complete Day ${cd.day}</button>
+          <button class="btn-s" onclick="startNewDay()">
+            Skip → Start Day ${Math.min(cd.day + 1, 60)}
+          </button>
+        </div>
+      </div>
+
+      <!-- RIGHT: Sliders -->
+      <div class="today-habits">
+        <div class="sec-label" style="margin-bottom:20px">Today's Activities</div>
+
+        ${vals.map((v, i) => `
+          <div class="habit-row">
+            <div class="habit-header">
+              <span class="habit-name">${escHtml(S.habitNames[i])}</span>
+              <span class="habit-val" id="tv-${i}">${Math.round(v)}%</span>
+            </div>
+            <div class="habit-bar-wrap">
+              <div class="habit-bar" id="tb-${i}"
+                style="width:${v}%;background:${colorFor(v)}"></div>
+            </div>
+            <input type="range" min="0" max="100" step="1" value="${v}" id="ts-${i}"
+              oninput="todaySlider(${i}, this.value)">
+          </div>`).join('')}
+
+        <div class="today-save-row">
+          <button class="btn-p" style="width:auto;padding:12px 30px;margin-top:0" onclick="saveToday()">
+            Save Progress
+          </button>
+          <button class="btn-g" onclick="resetTodayToDefault()">Reset to Defaults</button>
+        </div>
+      </div>
+
+    </div>`;
+}
+
+function todaySlider(idx, val) {
+  val = parseInt(val);
+  const cd = currentDay();
+  if (!cd) return;
+  cd.h[idx] = val;
+
+  document.getElementById(`tv-${idx}`).textContent = val + '%';
+  const bar = document.getElementById(`tb-${idx}`);
+  bar.style.width = val + '%';
+  bar.style.background = colorFor(val);
+
+  const total = getTotal(cd);
+  const pctEl = document.getElementById('t-ring-pct');
+  if (pctEl) {
+    pctEl.textContent = Math.round(total) + '%';
+    pctEl.style.color = colorFor(total);
+  }
+
+  // Update ring SVG stroke live
+  const ring = document.querySelector('#view-today .progress-ring circle:last-child');
+  if (ring) {
+    // size=160, stroke=8 → r=(160-16)/2=72
+    const r = 72, circ = 2 * Math.PI * r;
+    const dash = Math.max(0, (total / 100) * circ);
+    ring.setAttribute('stroke-dasharray', `${dash.toFixed(2)} ${circ.toFixed(2)}`);
+    ring.setAttribute('stroke', colorFor(total));
+  }
+}
+
+function saveToday() {
+  saveState();
+  renderHeader();
+  toast('Progress saved ✓');
+}
+
+function resetTodayToDefault() {
+  const cd = currentDay();
+  if (!cd) return;
+  cd.h = emptyHabitValues();
+  saveState();
+  renderToday();
+  toast('Reset to defaults');
+}
+
+function completeDay() {
+  const cd = currentDay();
+  if (!cd) return;
+  cd.status = 'past';
+  const next = S.days.find(d => d.status === 'future');
+  if (next) next.status = 'current';
+  saveState();
+  renderAll();
+  toast(next ? `Day ${cd.day} complete! Day ${next.day} started.` : `Day ${cd.day} complete! Sprint done! 🎉`);
+}
+
+function startNewDay() {
+  const cd = currentDay();
+  if (cd) cd.status = 'past';
+  const next = S.days.find(d => d.status === 'future');
+  if (next) {
+    next.status = 'current';
+    saveState();
+    renderAll();
+    toast(`Day ${next.day} started!`);
+  } else {
+    saveState();
+    renderAll();
+    toast('All 60 days complete! 🎉');
+  }
+}
+
+/* ═══════════════════════════════════════════
+   GRID VIEW
+═══════════════════════════════════════════ */
+function renderGrid() {
+  const box = document.getElementById('view-grid');
+  box.innerHTML = `
+    <div class="grid-header">
+      <div class="sec-label">60-Day Overview — click any cell to edit</div>
+      <div class="grid-legend">
+        <div class="leg-item"><div class="leg-dot" style="background:#0fd68a"></div>High 67%+</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#f5a623"></div>Mid 34–66%</div>
+        <div class="leg-item"><div class="leg-dot" style="background:#f43f5e"></div>Low 0–33%</div>
+        <div class="leg-item"><div class="leg-dot" style="border:1.5px solid #f5a623;background:transparent"></div>Active</div>
+      </div>
+    </div>
+
+    <div class="day-grid">
+      ${S.days.map(d => {
+        const isPast    = d.status === 'past';
+        const isCurrent = d.status === 'current';
+        const show      = isPast || isCurrent;
+        const total     = show ? getTotal(d) : 0;
+        const ring      = svgRing(total, 36, 3.5);
+        const tip = `Day ${d.day}: ${fmtDate(d.day)}${show ? ' — ' + Math.round(total) + '%' : ''}`;
+        return `
+          <div class="day-cell st-${d.status}" onclick="openModal(${d.day})" title="${tip}">
+            <div class="cell-num">${d.day}</div>
+            ${ring}
+          </div>`;
+      }).join('')}
+    </div>
+    <div class="grid-hint">Tip: cells glow when active · grey = future · click to edit any day</div>`;
+}
+
+/* ═══════════════════════════════════════════
+   LOG VIEW
+═══════════════════════════════════════════ */
+function renderLog() {
+  const past = S.days.filter(d => d.status === 'past');
+  const avgH = S.habitNames.map((_, i) => past.length
+    ? past.reduce((s,d) => s + getH(d,i), 0) / past.length : 0);
+  const avgT = past.length ? past.reduce((s,d) => s + getTotal(d), 0) / past.length : 0;
+
+  const box = document.getElementById('view-log');
+  box.innerHTML = `
+    <div class="log-wrap">
+      <table class="log-table">
+        <thead>
+          <tr>
+            <th>Day</th>
+            <th>Date</th>
+            <th>Status</th>
+            ${S.habitNames.map(name => `<th>${escHtml(name)}</th>`).join('')}
+            <th>Daily Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${S.days.map(d => {
+            const isPast    = d.status === 'past';
+            const isCurrent = d.status === 'current';
+            const show      = isPast || isCurrent;
+            const total     = getTotal(d);
+            const dotCol    = isCurrent ? '#f5a623' : isPast ? '#0fd68a' : '#32324e';
+
+            const cellVal = (i) => show ? `
+              <div style="display:flex;align-items:center;gap:8px">
+                <div class="mini-bar-wrap">
+                  <div class="mini-bar" style="width:${getH(d,i)}%;background:${colorFor(getH(d,i))}"></div>
+                </div>
+                <span style="font-family:var(--font-m);font-size:.78rem">${Math.round(getH(d,i))}%</span>
+              </div>` : `<span style="color:var(--text-3)">—</span>`;
+
+            return `
+              <tr class="row-${d.status}" onclick="openModal(${d.day})">
+                <td><span style="font-family:var(--font-m);font-weight:500">${d.day}</span></td>
+                <td style="font-size:.78rem;color:var(--text-2)">${fmtDate(d.day)}</td>
+                <td>
+                  <span class="s-dot" style="background:${dotCol}"></span>
+                  <span style="font-size:.78rem;text-transform:capitalize">${d.status}</span>
+                </td>
+                ${S.habitNames.map((_, i) => `<td>${cellVal(i)}</td>`).join('')}
+                <td>${show ? `
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <div class="mini-bar-wrap" style="width:64px">
+                      <div class="mini-bar" style="width:${total}%;background:${colorFor(total)}"></div>
+                    </div>
+                    <span style="font-family:var(--font-m);font-size:.82rem;font-weight:500;color:${colorFor(total)}">
+                      ${Math.round(total)}%
+                    </span>
+                  </div>` : `<span style="color:var(--text-3)">—</span>`}
+                </td>
+              </tr>`;
+          }).join('')}
+        </tbody>
+        ${past.length > 0 ? `
+        <tfoot>
+          <tr class="log-avg-row">
+            <td colspan="3">Average — ${past.length} logged day${past.length!==1?'s':''}</td>
+            ${avgH.map(v=>`<td>${Math.round(v)}%</td>`).join('')}
+            <td>${Math.round(avgT)}%</td>
+          </tr>
+        </tfoot>` : ''}
+      </table>
+    </div>`;
+}
+
+/* ═══════════════════════════════════════════
+   STATS VIEW
+═══════════════════════════════════════════ */
+function renderStats() {
+  const past  = S.days.filter(d => d.status === 'past');
+  const box   = document.getElementById('view-stats');
+
+  if (!past.length) {
+    box.innerHTML = `<div class="empty-stats">Complete some days to unlock your stats.</div>`;
+    return;
+  }
+
+  const streak    = calcStreak();
+  const avgTotal  = past.reduce((s,d) => s + getTotal(d), 0) / past.length;
+  const best      = past.reduce((b,d) => getTotal(d) > getTotal(b) ? d : b, past[0]);
+  const habitAvgs = S.habitNames.map((_, i) => past.reduce((s,d) => s + getH(d,i), 0) / past.length);
+  const sparkData = past.slice(-20).map(d => getTotal(d));
+
+  box.innerHTML = `
+    <div class="stats-grid">
+      <div class="stat-card card">
+        <div class="stat-card-lbl">Days Logged</div>
+        <div class="stat-card-val">${past.length}<span style="font-size:1.1rem;color:var(--text-2)">/60</span></div>
+        <div class="stat-card-sub">${Math.round((past.length/60)*100)}% of sprint complete</div>
+      </div>
+      <div class="stat-card card">
+        <div class="stat-card-lbl">Current Streak</div>
+        <div class="stat-card-val">${streak}</div>
+        <div class="stat-card-sub">consecutive days ≥ 50%</div>
+      </div>
+      <div class="stat-card card">
+        <div class="stat-card-lbl">Sprint Average</div>
+        <div class="stat-card-val">${Math.round(avgTotal)}%</div>
+        <div class="stat-card-sub">across all logged days</div>
+      </div>
+      <div class="stat-card card">
+        <div class="stat-card-lbl">Best Day</div>
+        <div class="stat-card-val">Day ${best.day}</div>
+        <div class="stat-card-sub">${Math.round(getTotal(best))}% · ${fmtDate(best.day)}</div>
+      </div>
+    </div>
+
+    <div class="stats-section">
+      <div class="stats-section-title">Activity Breakdown</div>
+      ${S.habitNames.map((name, i) => `
+        <div class="hab-avg-row">
+          <div class="hab-avg-hdr">
+            <span>${escHtml(name)}</span>
+            <span class="hab-avg-val">${Math.round(habitAvgs[i])}%</span>
+          </div>
+          <div class="habit-bar-wrap" style="height:7px;margin-bottom:0">
+            <div class="habit-bar"
+              style="height:100%;width:${habitAvgs[i]}%;background:${colorFor(habitAvgs[i])}">
+            </div>
+          </div>
+        </div>`).join('')}
+    </div>
+
+    ${sparkData.length > 1 ? `
+    <div class="stats-section">
+      <div class="card spark-wrap">
+        <div class="spark-title">Recent Progress — last ${sparkData.length} days</div>
+        ${buildSparkline(sparkData)}
+      </div>
+    </div>` : ''}`;
+}
+
+function buildSparkline(data) {
+  const W = 600, H = 90, padX = 30, padY = 10;
+  const iW = W - padX * 2, iH = H - padY * 2;
+  const step = iW / (data.length - 1);
+
+  const pts = data.map((v, i) => {
+    const x = padX + i * step;
+    const y = padY + iH - (v / 100) * iH;
+    return {x, y, v};
+  });
+
+  const polyPts = pts.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
+
+  // Area fill path
+  const areaPath = `M${pts[0].x.toFixed(1)},${(padY+iH).toFixed(1)} ` +
+    pts.map(p => `L${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ') +
+    ` L${pts[pts.length-1].x.toFixed(1)},${(padY+iH).toFixed(1)} Z`;
+
+  const grids = [0, 50, 100].map(v => {
+    const y = padY + iH - (v / 100) * iH;
+    return `
+      <line x1="${padX}" y1="${y.toFixed(1)}" x2="${W-padX}" y2="${y.toFixed(1)}"
+        stroke="#1c1c30" stroke-width="1"/>
+      <text x="${padX-6}" y="${(y+4).toFixed(1)}" fill="#32324e"
+        font-size="9" text-anchor="end" font-family="JetBrains Mono, monospace">${v}%</text>`;
+  }).join('');
+
+  const dots = pts.map(p => `
+    <circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="3.5"
+      fill="${colorFor(p.v)}" stroke="#07070e" stroke-width="1.5"/>
+  `).join('');
+
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" style="overflow:visible;display:block">
+    <defs>
+      <linearGradient id="sg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="var(--accent)" stop-opacity="0.18"/>
+        <stop offset="100%" stop-color="var(--accent)" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+    ${grids}
+    <path d="${areaPath}" fill="url(#sg)"/>
+    <polyline points="${polyPts}" fill="none" stroke="var(--accent)"
+      stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+    ${dots}
+  </svg>`;
+}
+
+/* ═══════════════════════════════════════════
+   SETTINGS VIEW
+═══════════════════════════════════════════ */
+function renderSettings() {
+  const box = document.getElementById('view-settings');
+  box.innerHTML = `
+
+    <!-- Sprint Details -->
+    <div class="card set-section">
+      <div class="set-section-title">Sprint Details</div>
+      <div class="set-row">
+        <label class="form-label">Sprint Name</label>
+        <input class="fi" id="set-name" type="text" value="${escHtml(S.sprintName)}" style="max-width:340px">
+      </div>
+      <div class="set-row">
+        <label class="form-label">Start Date</label>
+        <input class="fi" id="set-date" type="date" value="${S.startDate}" style="max-width:200px">
+      </div>
+      <button class="btn-s" onclick="saveSprintDetails()">Save Details</button>
+    </div>
+
+    <!-- Activity Names -->
+    <div class="card set-section">
+      <div class="set-section-title">Activity Names</div>
+      ${S.habitNames.map((name, i) => `
+        <div class="set-row">
+          <label class="form-label">Activity ${i+1}</label>
+          <input class="fi" id="set-h${i}" type="text" value="${escHtml(name)}" style="max-width:320px">
+        </div>`).join('')}
+      <button class="btn-s" onclick="saveHabitNames()">Save Activity Names</button>
+    </div>
+
+    <!-- Defaults -->
+    <div class="card set-section">
+      <div class="set-section-title">Default Values</div>
+      <p style="font-size:.83rem;color:var(--text-2);margin-bottom:22px;line-height:1.6">
+        These values pre-fill any day that hasn't been manually edited.
+        Changing defaults affects future display of unedited days immediately.
+      </p>
+      ${S.habitNames.map((name, i) => `
+        <div class="set-row">
+          <label class="form-label">${escHtml(name)}</label>
+          <div class="def-slider-row">
+            <input type="range" min="0" max="100" step="1"
+              value="${S.defaults[i]}" id="def-s${i}" oninput="defSlider(${i},this.value)">
+            <span class="def-val" id="def-v${i}">${S.defaults[i]}%</span>
+          </div>
+        </div>`).join('')}
+      <div class="set-actions">
+        <button class="btn-s" onclick="saveDefaults()">Save Defaults</button>
+        <button class="btn-g" onclick="applyDefaultsToAll()">Apply to All Unedited Days</button>
+      </div>
+    </div>
+
+    <!-- Data -->
+    <div class="card set-section">
+      <div class="set-section-title">Data</div>
+      <div class="set-actions">
+        <button class="btn-g" onclick="exportData()">↓ Export JSON</button>
+        <button class="btn-g" onclick="importData()">↑ Import JSON</button>
+        <button class="btn-danger" onclick="resetSprint()">⚠ Reset Sprint</button>
+      </div>
+      <p style="font-size:.75rem;color:var(--text-3);margin-top:14px">
+        All data is stored locally in your browser. Export regularly to keep a backup.
+      </p>
+    </div>`;
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function defSlider(i, val) {
+  S.defaults[i] = parseInt(val);
+  document.getElementById(`def-v${i}`).textContent = val + '%';
+}
+
+function saveDefaults() {
+  S.habitNames.forEach((_, i) => {
+    const el = document.getElementById(`def-s${i}`);
+    if (el) S.defaults[i] = parseInt(el.value);
+  });
+  saveState();
+  toast('Defaults saved ✓');
+  renderAll();
+}
+
+function applyDefaultsToAll() {
+  if (!confirm('This will clear all manually entered values. Days will revert to showing default values. Continue?')) return;
+  S.days.forEach(d => d.h = emptyHabitValues());
+  saveState();
+  renderAll();
+  toast('All days reset to defaults');
+}
+
+function saveSprintDetails() {
+  const nameEl = document.getElementById('set-name');
+  const dateEl = document.getElementById('set-date');
+  if (nameEl) S.sprintName = nameEl.value.trim() || S.sprintName;
+  if (dateEl) S.startDate  = dateEl.value || S.startDate;
+  saveState();
+  renderHeader();
+  toast('Sprint details saved ✓');
+}
+
+function saveHabitNames() {
+  S.habitNames.forEach((_, i) => {
+    const el = document.getElementById(`set-h${i}`);
+    if (el) S.habitNames[i] = el.value.trim() || S.habitNames[i];
+  });
+  saveState();
+  renderAll();
+  toast('Activity names updated ✓');
+}
+
+function resetSprint() {
+  if (!confirm('This will permanently delete ALL progress. There is no undo. Continue?')) return;
+  localStorage.removeItem(STORE_KEY);
+  location.reload();
+}
+
+function exportData() {
+  const blob = new Blob([JSON.stringify(S, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `${S.sprintName.replace(/\s+/g,'-').toLowerCase()}-backup.json`;
+  a.click();
+}
+
+function importData() {
+  const input = document.createElement('input');
+  input.type = 'file'; input.accept = '.json';
+  input.onchange = e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const data = JSON.parse(ev.target.result);
+        if (!data.days || !Array.isArray(data.days)) throw new Error('Invalid format');
+        S = normalizeState(data);
+        saveState();
+        renderAll();
+        toast('Data imported ✓');
+      } catch(err) { toast('⚠ Invalid file — import failed'); }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+/* ═══════════════════════════════════════════
+   MODAL
+═══════════════════════════════════════════ */
+function openModal(dayNum) {
+  const d    = S.days[dayNum - 1];
+  const vals = S.habitNames.map((_, i) => getH(d, i));
+  const tot  = getTotal(d);
+  modalEdits = {}; // reset
+
+  // Pre-populate edits with current values
+  modalEdits[dayNum] = [...vals];
+
+  const card = document.getElementById('modal-card');
+  card.innerHTML = `
+    <div class="modal-hdr">
+      <div>
+        <div class="modal-title">Day ${d.day}</div>
+        <div class="modal-sub">${fmtDate(d.day)} · ${d.status}</div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+
+    <div class="modal-ring-wrap">
+      <div class="modal-ring-inner" id="modal-ring-wrap">
+        ${svgRing(tot, 110)}
+        <div class="modal-ring-center">
+          <span id="m-ring-pct" style="font-family:var(--font-m);font-size:1.45rem;font-weight:500;color:${colorFor(tot)}">${Math.round(tot)}%</span>
+          <span style="font-size:.62rem;color:var(--text-2);text-transform:uppercase;letter-spacing:.07em">avg</span>
+        </div>
+      </div>
+    </div>
+
+    ${S.habitNames.map((_, i) => `
+      <div class="habit-row" style="padding:16px 0;border-bottom:${i<S.habitNames.length-1?'1px solid var(--border)':'none'}">
+        <div class="habit-header">
+          <span class="habit-name" style="font-size:.875rem">${escHtml(S.habitNames[i])}</span>
+          <span class="habit-val" id="mv-${i}">${Math.round(vals[i])}%</span>
+        </div>
+        <div class="habit-bar-wrap">
+          <div class="habit-bar" id="mb-${i}" style="width:${vals[i]}%;background:${colorFor(vals[i])}"></div>
+        </div>
+        <input type="range" min="0" max="100" step="1" value="${vals[i]}"
+          oninput="modalSlider(${dayNum},${i},this.value)">
+      </div>`).join('')}
+
+    <div style="margin-top:18px">
+      <label class="form-label">Notes</label>
+      <textarea class="modal-notes" id="m-notes" placeholder="How did it go today?">${escHtml(d.notes||'')}</textarea>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-p" onclick="saveModal(${dayNum})">Save Day ${dayNum}</button>
+      <button class="btn-g" onclick="resetModal(${dayNum})">Clear Custom Values</button>
+    </div>`;
+
+  document.getElementById('modal').style.display = 'block';
+}
+
+function modalSlider(dayNum, idx, val) {
+  val = parseInt(val);
+  if (!modalEdits[dayNum]) modalEdits[dayNum] = S.habitNames.map((_,i) => getH(S.days[dayNum-1], i));
+  modalEdits[dayNum][idx] = val;
+
+  document.getElementById(`mv-${idx}`).textContent = val + '%';
+  const bar = document.getElementById(`mb-${idx}`);
+  bar.style.width = val + '%';
+  bar.style.background = colorFor(val);
+
+  const total = modalEdits[dayNum].reduce((sum, v) => sum + v, 0) / Math.max(modalEdits[dayNum].length, 1);
+  const pctEl = document.getElementById('m-ring-pct');
+  if (pctEl) { pctEl.textContent = Math.round(total) + '%'; pctEl.style.color = colorFor(total); }
+
+  // Update modal ring — size=110, stroke=8 → r=(110-16)/2=47
+  const ring = document.querySelector('#modal-card .progress-ring circle:last-child');
+  if (ring) {
+    const r = 47, circ = 2 * Math.PI * r;
+    const dash = Math.max(0, (total / 100) * circ);
+    ring.setAttribute('stroke-dasharray', `${dash.toFixed(2)} ${circ.toFixed(2)}`);
+    ring.setAttribute('stroke', colorFor(total));
+  }
+}
+
+function saveModal(dayNum) {
+  const d = S.days[dayNum - 1];
+  if (modalEdits[dayNum]) d.h = [...modalEdits[dayNum]];
+  const notesEl = document.getElementById('m-notes');
+  if (notesEl) d.notes = notesEl.value;
+  modalEdits = {};
+  saveState();
+  closeModal();
+  renderAll();
+  toast(`Day ${dayNum} saved ✓`);
+}
+
+function resetModal(dayNum) {
+  const d = S.days[dayNum - 1];
+  d.h = emptyHabitValues();
+  modalEdits = {};
+  saveState();
+  closeModal();
+  renderAll();
+  toast('Cleared — showing defaults');
+}
+
+function closeModal() {
+  document.getElementById('modal').style.display = 'none';
+  modalEdits = {};
+}
+
+function closeModalBackdrop(e) {
+  if (e.target === document.querySelector('.modal-backdrop')) closeModal();
+}
+
+/* ═══════════════════════════════════════════
+   SPRINT NAME INLINE EDIT
+═══════════════════════════════════════════ */
+function editSprintName() {
+  const el = document.getElementById('sprint-name-display');
+  const cur = S.sprintName;
+  el.innerHTML = `<input class="sprint-name-input" value="${escHtml(cur)}"
+    onblur="commitSprintName(this)"
+    onkeydown="if(event.key==='Enter')this.blur();if(event.key==='Escape'){this.value='${escHtml(cur)}';this.blur();}">`;
+  el.querySelector('input').select();
+}
+
+function commitSprintName(input) {
+  S.sprintName = input.value.trim() || S.sprintName;
+  saveState();
+  renderHeader();
+}
+
+/* ═══════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════ */
+function toast(msg) {
+  document.querySelectorAll('.toast').forEach(t => t.remove());
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => { if (t.parentNode) t.remove(); }, 2700);
+}
+
+/* ═══════════════════════════════════════════
+   KEYBOARD
+═══════════════════════════════════════════ */
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+});
+
+/* ═══════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════ */
+(function init() {
+  // Default start date to today
+  const today = new Date().toISOString().split('T')[0];
+  const sDateEl = document.getElementById('s-date');
+  if (sDateEl) sDateEl.value = today;
+
+  initSetupActivities();
+
+  if (loadState()) {
+    showApp();
+  }
+  // else: setup screen is shown by default
+})();
+</script>
+</body>
+</html>
